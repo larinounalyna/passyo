@@ -155,8 +155,8 @@ export async function apiRequest<T>(
   }
   if (method === "POST" && path === "/suivi/avenants") {
     const newItem: Avenant = {
+      ...(body as Omit<Avenant, "id" | "created_at">),
       created_at: new Date().toISOString().split("T")[0],
-      ...(body as Omit<Avenant, "id">),
       id: nextAvenantId++,
     };
     AVENANTS.unshift(newItem);
