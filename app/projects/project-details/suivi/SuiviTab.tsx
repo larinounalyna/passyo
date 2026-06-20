@@ -416,7 +416,7 @@ animate-spin
           }
         >
           <div className="form-group">
-            <label>Titre / Description de l'ouvrage</label>
+            <label>Titre / Description de l ouvrage</label>
 
             <input
               className={inputCls}

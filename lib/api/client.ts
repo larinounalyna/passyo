@@ -123,11 +123,15 @@ export async function apiRequest<T>(
     return ATTACHMENTS.filter((a) => a.project_id === pid) as unknown as T;
   }
   if (method === "POST" && path === "/suivi/attachments") {
+    const { is_validated, created_at, ...rest } = body as Omit<
+      Attachment,
+      "id"
+    >;
     const newItem: Attachment = {
-      ...(body as Omit<Attachment, "id" | "is_validated" | "created_at">),
+      ...rest,
+      id: nextAttachmentId++,
       is_validated: false,
       created_at: new Date().toISOString().split("T")[0],
-      id: nextAttachmentId++,
     };
     ATTACHMENTS.unshift(newItem);
     return newItem as unknown as T;
@@ -154,10 +158,11 @@ export async function apiRequest<T>(
     return AVENANTS.filter((a) => a.project_id === pid) as unknown as T;
   }
   if (method === "POST" && path === "/suivi/avenants") {
+    const { created_at, ...rest } = body as Omit<Avenant, "id">;
     const newItem: Avenant = {
-      ...(body as Omit<Avenant, "id" | "created_at">),
-      created_at: new Date().toISOString().split("T")[0],
+      ...rest,
       id: nextAvenantId++,
+      created_at: new Date().toISOString().split("T")[0],
     };
     AVENANTS.unshift(newItem);
     return newItem as unknown as T;
@@ -175,11 +180,12 @@ export async function apiRequest<T>(
     return SITUATIONS.filter((s) => s.project_id === pid) as unknown as T;
   }
   if (method === "POST" && path === "/suivi/situations") {
+    const { is_approved, created_at, ...rest } = body as Omit<Situation, "id">;
     const newItem: Situation = {
+      ...rest,
+      id: nextSituationId++,
       is_approved: false,
       created_at: new Date().toISOString().split("T")[0],
-      ...(body as Omit<Situation, "id">),
-      id: nextSituationId++,
     };
     SITUATIONS.unshift(newItem);
     return newItem as unknown as T;
@@ -203,9 +209,10 @@ export async function apiRequest<T>(
 
   // POST tasks
   if (method === "POST" && path === "/tasks") {
+    const { status, ...rest } = (body as any) ?? {};
     return {
+      ...rest,
       id: Math.floor(Math.random() * 10000),
-      ...((body as object) ?? {}),
       status: "todo",
     } as unknown as T;
   }
