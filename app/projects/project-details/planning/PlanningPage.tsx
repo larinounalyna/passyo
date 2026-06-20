@@ -198,20 +198,18 @@ export default function PlanningPage() {
     setSections((prev) =>
       prev.map((s) => {
         if (s.id !== sectionId) return s;
-        const nextRows = [
-          ...s.rows,
-          {
-            id: newId,
-            name: "Nouvelle tâche",
-            unit: "u",
-            quantity: 0,
-            team: "Équipe Alpha",
-            teamVariant: "blue",
-            start: new Date().toISOString().split("T")[0],
-            end: new Date().toISOString().split("T")[0],
-            duration: "1j",
-          },
-        ];
+        const newTask: TaskRow = {
+          id: newId,
+          name: "Nouvelle tâche",
+          unit: "u",
+          quantity: 0,
+          team: "Équipe Alpha",
+          teamVariant: "blue",
+          start: new Date().toISOString().split("T")[0],
+          end: new Date().toISOString().split("T")[0],
+          duration: "1j",
+        };
+        const nextRows = [...s.rows, newTask];
         return {
           ...s,
           rows: nextRows,
