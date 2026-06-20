@@ -3,7 +3,17 @@
  * All API calls return mock data. No backend required.
  */
 
-import { RESOURCES, TEAM_MEMBERS, PROJECTS, ATTACHMENTS, AVENANTS, SITUATIONS, type Attachment, type Avenant, type Situation } from "@/lib/mock/data";
+import {
+  RESOURCES,
+  TEAM_MEMBERS,
+  PROJECTS,
+  ATTACHMENTS,
+  AVENANTS,
+  SITUATIONS,
+  type Attachment,
+  type Avenant,
+  type Situation,
+} from "@/lib/mock/data";
 
 // In-memory id counters for newly created Suivi documents (mock persistence
 // lives only for the lifetime of the page — refreshing resets to seed data).
@@ -13,19 +23,62 @@ let nextSituationId = Math.max(0, ...SITUATIONS.map((s) => s.id)) + 1;
 
 export async function apiRequest<T>(
   path: string,
-  { method = "GET", body }: { method?: string; body?: unknown; params?: Record<string, string | number | boolean> } = {}
+  {
+    method = "GET",
+    body,
+  }: {
+    method?: string;
+    body?: unknown;
+    params?: Record<string, string | number | boolean>;
+  } = {},
 ): Promise<T> {
   // Simulate network delay
-  await new Promise(r => setTimeout(r, 80));
+  await new Promise((r) => setTimeout(r, 80));
 
   // Tasks / project tasks
   if (path.match(/\/tasks\/project\/\d+/)) {
     const pid = parseInt(path.split("/").pop()!);
     return [
-      { id: 1, title: "Coulage fondations bloc A", status: "done", project_id: pid, assigned_to: 1, start_date: "2025-06-01", end_date: "2025-06-05", description: "" },
-      { id: 2, title: "Ferraillage niveau 1", status: "in_progress", project_id: pid, assigned_to: 2, start_date: "2025-06-06", end_date: "2025-06-12", description: "" },
-      { id: 3, title: "Coffrages piliers RDC", status: "todo", project_id: pid, assigned_to: 3, start_date: "2025-06-13", end_date: "2025-06-18", description: "" },
-      { id: 4, title: "Réception matériaux lot 3", status: "todo", project_id: pid, assigned_to: 1, start_date: "2025-06-15", end_date: "2025-06-16", description: "" },
+      {
+        id: 1,
+        title: "Coulage fondations bloc A",
+        status: "done",
+        project_id: pid,
+        assigned_to: 1,
+        start_date: "2025-06-01",
+        end_date: "2025-06-05",
+        description: "",
+      },
+      {
+        id: 2,
+        title: "Ferraillage niveau 1",
+        status: "in_progress",
+        project_id: pid,
+        assigned_to: 2,
+        start_date: "2025-06-06",
+        end_date: "2025-06-12",
+        description: "",
+      },
+      {
+        id: 3,
+        title: "Coffrages piliers RDC",
+        status: "todo",
+        project_id: pid,
+        assigned_to: 3,
+        start_date: "2025-06-13",
+        end_date: "2025-06-18",
+        description: "",
+      },
+      {
+        id: 4,
+        title: "Réception matériaux lot 3",
+        status: "todo",
+        project_id: pid,
+        assigned_to: 1,
+        start_date: "2025-06-15",
+        end_date: "2025-06-16",
+        description: "",
+      },
     ] as unknown as T;
   }
 
@@ -37,16 +90,30 @@ export async function apiRequest<T>(
   // Human resources / crew
   if (path.match(/\/resources\/human\/\d+/)) {
     const pid = parseInt(path.split("/").pop()!);
-    return TEAM_MEMBERS.filter(m => m.projectId === pid) as unknown as T;
+    return TEAM_MEMBERS.filter((m) => m.projectId === pid) as unknown as T;
   }
 
   // Reports
   if (path.match(/\/reports\/project\/\d+/)) {
     const pid = parseInt(path.split("/").pop()!);
-    const proj = PROJECTS.find(p => p.id === pid);
+    const proj = PROJECTS.find((p) => p.id === pid);
     return [
-      { id: 1, project_id: pid, type: "daily", title: `PV de chantier — ${proj?.name ?? "Projet"}`, created_at: "2025-06-10", status: "validated" },
-      { id: 2, project_id: pid, type: "weekly", title: "Rapport hebdomadaire semaine 23", created_at: "2025-06-08", status: "draft" },
+      {
+        id: 1,
+        project_id: pid,
+        type: "daily",
+        title: `PV de chantier — ${proj?.name ?? "Projet"}`,
+        created_at: "2025-06-10",
+        status: "validated",
+      },
+      {
+        id: 2,
+        project_id: pid,
+        type: "weekly",
+        title: "Rapport hebdomadaire semaine 23",
+        created_at: "2025-06-08",
+        status: "draft",
+      },
     ] as unknown as T;
   }
 
@@ -57,15 +124,18 @@ export async function apiRequest<T>(
   }
   if (method === "POST" && path === "/suivi/attachments") {
     const newItem: Attachment = {
+      ...(body as Omit<Attachment, "id" | "is_validated" | "created_at">),
       is_validated: false,
       created_at: new Date().toISOString().split("T")[0],
-      ...(body as Omit<Attachment, "id">),
       id: nextAttachmentId++,
     };
     ATTACHMENTS.unshift(newItem);
     return newItem as unknown as T;
   }
-  if (method === "PATCH" && /^\/suivi\/attachments\/\d+\/validate$/.test(path)) {
+  if (
+    method === "PATCH" &&
+    /^\/suivi\/attachments\/\d+\/validate$/.test(path)
+  ) {
     const id = parseInt(path.split("/")[3], 10);
     const item = ATTACHMENTS.find((a) => a.id === id);
     if (item) item.is_validated = true;
@@ -128,11 +198,16 @@ export async function apiRequest<T>(
   }
 
   // Generate report
-  if (path.match(/\/reports\/generate/)) return { success: true } as unknown as T;
+  if (path.match(/\/reports\/generate/))
+    return { success: true } as unknown as T;
 
   // POST tasks
   if (method === "POST" && path === "/tasks") {
-    return { id: Math.floor(Math.random() * 10000), ...((body as object) ?? {}), status: "todo" } as unknown as T;
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...((body as object) ?? {}),
+      status: "todo",
+    } as unknown as T;
   }
 
   // PATCH/PUT tasks
